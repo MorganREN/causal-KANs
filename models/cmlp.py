@@ -9,7 +9,6 @@ class MLP(nn.Module):
     def __init__(self, num_series, lag, hidden, activation):
         super(MLP, self).__init__()
         self.activation = activation_helper(activation)
-        self.hidden = hidden
 
         # Set up network.
         layer = nn.Conv1d(num_series, hidden[0], lag)
