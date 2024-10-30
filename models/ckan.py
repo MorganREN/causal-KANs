@@ -67,6 +67,23 @@ class cKAN(nn.Module):
 
         return GC
 
+    def get_lag_scores(self, array):
+        '''
+        Get the score of each lag
+
+        Returns:
+            output: Score of each lag
+        '''
+        output = []
+        X = rearrange_data(array, self.p, self.lag)
+
+        for i in range(self.p):
+            scores = self.networks[i].get_scores(X)
+            output.append(scores.detach().numpy())
+
+        output = np.array(output).reshape(self.p, self.p, self.lag)
+        return output
+
 
     def get_scores(self, array):
         '''
@@ -85,6 +102,8 @@ class cKAN(nn.Module):
 
         output = np.array(output)
         return output
+    
+    
     
 
 def rearrange_data(X, num_series, lag):
@@ -231,3 +250,37 @@ def plot_scores(scores):
     plt.xticks([])
     plt.yticks([])
     plt.show()
+
+
+def plot_lag_scores(cKAN, X, GC, lag_input, num_series):
+    '''
+    Plot the scores of each lag
+    '''
+    for i in range(num_series):
+        GC_lag = np.zeros((lag_input, num_series))
+        GC_lag[:3, GC[i].astype(bool)] = 1.0
+
+        scores_lag = np.flip(cKAN.get_lag_scores(X)[i].T, axis=0)
+        fig, axarr = plt.subplots(1, 2, figsize=(16, 5))
+        axarr[0].imshow(GC_lag, cmap='Blues', extent=(0, num_series, lag_input, 0))
+        axarr[0].set_title('Series %d true GC' % (i + 1))
+        axarr[0].set_ylabel('Lag')
+        axarr[0].set_xlabel('Series')
+        axarr[0].set_xticks(np.arange(num_series) + 0.5)
+        axarr[0].set_xticklabels(range(num_series))
+        axarr[0].set_yticks(np.arange(5) + 0.5)
+        axarr[0].set_yticklabels(range(1, 5 + 1))
+        axarr[0].tick_params(axis='both', length=0)
+
+        axarr[1].imshow(scores_lag, cmap='Blues', extent=(0, num_series, lag_input, 0))
+        axarr[1].set_title('Series %d estimated GC' % (i + 1))
+        axarr[1].set_ylabel('Lag')
+        axarr[1].set_xlabel('Series')
+        axarr[1].set_xticks(np.arange(num_series) + 0.5)
+        axarr[1].set_xticklabels(range(num_series))
+        axarr[1].set_yticks(np.arange(5) + 0.5)
+        axarr[1].set_yticklabels(range(1, 5 + 1))
+        axarr[1].tick_params(axis='both', length=0)
+
+        plt.show()
+
