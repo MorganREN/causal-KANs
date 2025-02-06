@@ -1,2 +1,3 @@
 # causal-KANs
-Code for the paper <Causal-KANs: pruning causality trees>
+Code for the paper <Granger Causality Detection with Kolmogorov-Arnold Networks>
+[link: https://arxiv.org/abs/2412.15373]
